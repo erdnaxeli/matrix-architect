@@ -1,0 +1,13 @@
+name: matrix-architect
+version: 0.1.0
+
+authors:
+  - Alexandre Morignot <amorignot@meilleursagents.com>
+
+targets:
+  matrix-architect:
+    main: src/matrix-architect.cr
+
+crystal: 0.34.0
+
+license: MIT
