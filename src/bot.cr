@@ -10,10 +10,16 @@ module Matrix::Architect
       conn.sync(channel)
 
       loop do
-        event = channel.receive
+        sync = channel.receive
 
-        event.invites do |invite|
+        sync.invites do |invite|
           conn.join(invite.room_id)
+        end
+
+        sync.room_events do |event|
+          if (message = event.message?) && event.sender != conn.user_id
+            conn.send_message event.room_id, message.body
+          end
         end
       end
     end
