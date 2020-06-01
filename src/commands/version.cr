@@ -1,3 +1,5 @@
+require "../connection"
+
 module Matrix::Architect
   module Commands
     module Version

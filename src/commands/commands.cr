@@ -1,3 +1,4 @@
+require "./room"
 require "./user"
 require "./version"
 
@@ -11,12 +12,15 @@ module Matrix::Architect
       when "!help"
         msg = String.build do |str|
           str << "!help\nDisplay this help.\n\n"
+          Room.usage str
+          str << "\n"
           User.usage str
           str << "\n"
           Version.usage str
         end
-
         conn.send_message room_id, msg
+      when "!room"
+        Room.run args, room_id, conn
       when "!user"
         User.run args, room_id, conn
       when "!version"
