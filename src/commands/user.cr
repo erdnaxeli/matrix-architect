@@ -22,6 +22,8 @@ module Matrix::Architect
             list args
           when "reset-password"
             reset_password args
+          when "query"
+            query args
           else
             @conn.send_message @room_id, "Unknown command"
           end
@@ -33,6 +35,8 @@ module Matrix::Architect
                     list_usage
                   when "reset-password"
                     reset_password_usage
+                  when "query"
+                    query_usage
                   else
                     "unknown command"
                   end
@@ -52,8 +56,11 @@ List users.
   --user-id FILTER    filter on users' id
 
 !user reset-password [--no-logout] USER_ID
-Reset a user's password and return the new password
+Reset a user's password and return the new password.
   --no-logout         do not log the user out of all their devices
+
+!user query USER_ID
+Reutrn information about a specific user account.
         "
       end
 
@@ -149,7 +156,6 @@ Reset a user's password and return the new password
           html = build_users_msg users, html: true
           @conn.send_message @room_id, msg, html
         end
-
       end
 
       private def list_usage
@@ -185,6 +191,26 @@ Reset a user's password and return the new password
 
       private def reset_password_usage
         "reset-password [--no-logout] USER_ID"
+      end
+
+      private def query(args)
+        user_id = args.pop?
+        if user_id.nil?
+          raise OptionParser::MissingOption.new("user_id")
+        end
+
+        begin
+          response = @conn.get "/v2/users/#{user_id}", is_admin: true
+        rescue ex : Connection::ExecError
+          @conn.send_message @room_id, "Error: #{ex.message}"
+        else
+          msg = response.to_pretty_json
+          @conn.send_message @room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>"
+        end
+      end
+
+      private def query_usage
+        "query USER_ID"
       end
     end
   end
