@@ -35,6 +35,10 @@ Get top 10 rooms in complexity, aka state events number.
 
 !room top-members
 Get top 10 rooms in number of members.
+
+!room purge ROOM_ID
+Remove all trace of a room from your database.
+All local users must have left the room before.
 "
       end
 
@@ -47,6 +51,8 @@ Get top 10 rooms in number of members.
           complexity
         when "top-members"
           members
+        when "purge"
+          purge args
         else
           @conn.send_message @room_id, "Unknown command"
         end
@@ -127,6 +133,22 @@ Get top 10 rooms in number of members.
       end
 
       private def members : Nil
+      end
+
+      private def purge(args)
+        room_id = args.pop?
+        if room_id.nil?
+          @conn.send_message @room_id, "Usage: !room purge ROOM_ID"
+        end
+
+        @conn.send_message @room_id, "Purge starting, depending on the size of the room it may take a while"
+        begin
+          @conn.post "/v1/purge_room", is_admin: true, data: {room_id: room_id}
+        rescue ex : Connection::ExecError
+          @conn.send_message @room_id, "Error: #{ex.message}"
+        else
+          @conn.send_message @room_id, "Purge done"
+        end
       end
     end
   end
