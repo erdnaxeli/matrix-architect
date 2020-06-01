@@ -147,7 +147,7 @@ All local users must have left the room before.
         rescue ex : Connection::ExecError
           @conn.send_message @room_id, "Error: #{ex.message}"
         else
-          @conn.send_message @room_id, "Purge done"
+          @conn.send_message @room_id, "#{room_id} purged"
         end
       end
     end

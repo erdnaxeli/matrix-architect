@@ -30,14 +30,18 @@ module Matrix::Architect
 
         sync.room_events do |event|
           if (message = event.message?) && event.sender != conn.user_id
-            begin
-              Commands.run message.body, event.room_id, conn
-            rescue ex : Exception
-              puts %(Error while executing command "message.body")
-              puts ex.message
-            end
+            spawn exec_command message, event, conn
           end
         end
+      end
+    end
+
+    def self.exec_command(message, event, conn)
+      begin
+        Commands.run message.body, event.room_id, conn
+      rescue ex : Exception
+        puts %(Error while executing command "message.body")
+        puts ex.message
       end
     end
   end
