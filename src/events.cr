@@ -37,8 +37,6 @@ module Matrix::Architect
     struct Sync
       def initialize(payload : JSON::Any)
         @payload = payload
-
-        puts payload
       end
 
       def invites(&block)

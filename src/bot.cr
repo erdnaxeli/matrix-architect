@@ -1,3 +1,4 @@
+require "./commands"
 require "./connection"
 require "./events"
 
@@ -6,6 +7,7 @@ module Matrix::Architect
     def self.run(hs_url, access_token)
       conn = Connection.new(hs_url, access_token)
 
+      first_sync = true
       channel = Channel(Events::Sync).new
       conn.sync(channel)
 
@@ -13,12 +15,22 @@ module Matrix::Architect
         sync = channel.receive
 
         sync.invites do |invite|
-          conn.join(invite.room_id)
+          begin
+            conn.join(invite.room_id)
+          rescue Connection::ExecError
+          end
+        end
+
+        if first_sync
+          # Ignore the first sync's messages as it can contains events already
+          # seen.
+          first_sync = false
+          next
         end
 
         sync.room_events do |event|
           if (message = event.message?) && event.sender != conn.user_id
-            conn.send_message event.room_id, message.body
+            Commands.run message.body, event.room_id, conn
           end
         end
       end
