@@ -7,10 +7,11 @@ module Matrix::Architect
       command = args.shift
 
       case command
-      when "user"
+      when "!user"
         User.run args, room_id, conn
-      when "help"
+      when "!help"
         msg = String.build do |str|
+          str << "!help\nDisplay this help.\n\n"
           User.usage str
         end
 

@@ -16,6 +16,8 @@ module Matrix::Architect
         command = args.shift?
         begin
           case command
+          when "deactivate"
+            deactivate args
           when "list"
             list args
           when "reset-password"
@@ -25,6 +27,8 @@ module Matrix::Architect
           end
         rescue OptionParser::InvalidOption | OptionParser::MissingOption
           usage = case command
+                  when "deactivate"
+                    deactivate_usage
                   when "list"
                     list_usage
                   when "reset-password"
@@ -33,18 +37,21 @@ module Matrix::Architect
                     "unknown command"
                   end
 
-          @conn.send_message @room_id, "Invalid command, usage: user #{usage}"
+          @conn.send_message @room_id, "Invalid command, usage: !user #{usage}"
         end
       end
 
       def self.usage(str)
         str << "\
-user list [--no-guests] [--user-id FILTER]
+!user deactivate USER_ID
+Deactive an account.
+
+!user list [--no-guests] [--user-id FILTER]
 List users.
   --no-gests          do not list guests users
   --user-id FILTER    filter on users' id
 
-user reset-password [--no-logout] USER_ID
+!user reset-password [--no-logout] USER_ID
 Reset a user's password and return the new password
   --no-logout         do not log the user out of all their devices
         "
@@ -98,6 +105,25 @@ Reset a user's password and return the new password
         end
       end
 
+      private def deactivate(args)
+        user_id = args.pop?
+        if user_id.nil?
+          raise OptionParser::MissingOption.new("user_id")
+        end
+
+        begin
+          @conn.post "/v1/deactivate/#{user_id}", is_admin: true
+        rescue ex : Connection::ExecError
+          @conn.send_message @room_id, "Error while deactivating the user: #{ex.message}"
+        else
+          @conn.send_message @room_id, "user deactivated"
+        end
+      end
+
+      private def deactivate_usage
+        "deactivate USER_ID"
+      end
+
       private def list(args) : Nil
         guests = true
         user_id = nil
@@ -107,18 +133,23 @@ Reset a user's password and return the new password
           parser.on("--user-id FILTER", "filter users containing this value") { |filter| user_id = filter }
         end
 
-        params = {guest: guests, user_id: user_id}
-        response = @conn.get "/v2/users", **params, is_admin: true
-        users = response["users"].as_a
+        begin
+          params = {guest: guests, user_id: user_id}
+          response = @conn.get "/v2/users", **params, is_admin: true
+          users = response["users"].as_a
 
-        while next_token = response["next_token"]?
-          response = @conn.get "/v2/users", **params, is_admin: true, from: next_token.as_s
-          users.concat(response["users"].as_a)
+          while next_token = response["next_token"]?
+            response = @conn.get "/v2/users", **params, is_admin: true, from: next_token.as_s
+            users.concat(response["users"].as_a)
+          end
+        rescue ex : Connection::ExecError
+          @conn.send_message @room_id, "Error while getting users list: #{ex.message}"
+        else
+          msg = build_users_msg users
+          html = build_users_msg users, html: true
+          @conn.send_message @room_id, msg, html
         end
 
-        msg = build_users_msg users
-        html = build_users_msg users, html: true
-        @conn.send_message @room_id, msg, html
       end
 
       private def list_usage
@@ -127,7 +158,11 @@ Reset a user's password and return the new password
 
       private def reset_password(args) : Nil
         logout = true
-        user_id = args.pop
+        user_id = args.pop?
+        if user_id.nil?
+          raise OptionParser::MissingOption.new("user_id")
+        end
+
         OptionParser.parse(args) do |parser|
           parser.banner = "Reset a user password"
           parser.on("--no-logout", "do not logout the user") { logout = false }
@@ -149,7 +184,7 @@ Reset a user's password and return the new password
       end
 
       private def reset_password_usage
-        "reset-password [--no-logout]"
+        "reset-password [--no-logout] USER_ID"
       end
     end
   end
