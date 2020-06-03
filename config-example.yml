@@ -5,3 +5,5 @@ homeserver: your.homeserver.org
 # The account must be admin, see:
 # https://github.com/matrix-org/synapse/tree/master/docs/admin_api
 access_token: someaccesstoken
+users:
+  - @some:admin.org

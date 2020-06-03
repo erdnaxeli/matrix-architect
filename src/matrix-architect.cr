@@ -5,47 +5,39 @@ require "./bot"
 module Matrix::Architect
   VERSION = "0.1.0"
 
+  struct Config
+    YAML.mapping(
+      access_token: String,
+      hs_url: {
+        key: "homeserver",
+        type: String,
+      },
+      users_id: {
+        key: "users",
+        type: Array(String),
+      }
+    )
+  end
+
   def self.get_config
     begin
       config = File.open("config.yml") do |file|
-        YAML.parse(file)
-      end.as_h?
+        Config.from_yaml(file)
+      end
     rescue File::NotFoundError
       puts "Configuration file 'config.yml' not found"
       return
+    rescue ex : YAML::ParseException
+      puts "Error while reading config file: #{ex.message}"
     end
 
-    if config.nil?
-      puts "Invalid configuration"
-      return
-    end
-
-    begin
-      access_token = config["access_token"].as_s?
-    rescue KeyError
-      puts "Invalid configuration: missing access_token"
-      return
-    end
-
-    begin
-      hs_url = config["homeserver"].as_s?
-    rescue KeyError
-      puts "Invalid configuration: missing homeserver"
-      return
-    end
-    if access_token.nil? || hs_url.nil?
-      puts "Invalid configuration"
-      return
-    end
-
-    return access_token, hs_url
+    return config
   end
 
   def self.run
     config = self.get_config
     if !config.nil?
-      access_token, hs_url = config
-      bot = Bot.run(hs_url, access_token)
+      Bot.new(config).run
     end
   end
 end
