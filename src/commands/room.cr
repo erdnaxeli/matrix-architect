@@ -56,7 +56,7 @@ All local users must have left the room before.
         when "count"
           count
         when "details"
-          details args
+          details args.pop?
         when "garbage-collect"
           garbage_collect
         when "top-complexity"
@@ -66,7 +66,7 @@ All local users must have left the room before.
         when "top-members"
           top_rooms Order::JoinedMembers
         when "purge"
-          purge args
+          purge args.pop?
         else
           @conn.send_message @room_id, "Unknown command"
         end
@@ -113,11 +113,9 @@ All local users must have left the room before.
         else
           @conn.send_message @room_id, "There are #{rooms.size} rooms on this HS"
         end
-
       end
 
-      private def details(args) : Nil
-        room_id = args.pop?
+      private def details(room_id : String?) : Nil
         if room_id.nil?
           @conn.send_message @room_id, "Usage: !room details ROOM_ID"
           return
@@ -133,48 +131,93 @@ All local users must have left the room before.
         end
       end
 
-      private def garbage_collect
+      private def garbage_collect : Nil
         begin
-          rooms = get_rooms Order::JoinedLocalMembers, limit: 0, reverse: true
+          rooms = get_rooms(Order::JoinedLocalMembers, limit: 0, reverse: true)
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error: #{ex.message}"
+          @conn.send_message(@room_id, "Error: #{ex.message}")
           return
         end
 
         idx = -1
-        rooms.each_index { |i| rooms[i]["joined_local_members"].as_i == 0 && (idx = i)}
-        @conn.send_message @room_id, "Found #{idx + 1} rooms to garbage collect"
+        # TODO: is there a way to not go through all the rooms?
+        rooms.each_index { |i| rooms[i]["joined_local_members"].as_i == 0 && (idx = i) }
+
+        if idx == -1
+          @conn.send_message(@room_id, "No rooms found for garbage collection")
+          return
+        end
+
+        @conn.send_message(@room_id, "Found #{idx + 1} rooms to garbage collect")
+        event_id = @conn.send_message(@room_id, "starting")
+
+        begin
+          count = 0
+          ten_percent_bucket = (idx + 1) // 10
+          t_start = Time.utc
+
+          rooms[0...idx].each do |room|
+            count += 1
+            purge(room["room_id"].as_s, silent: true)
+
+            # update the message every 10%
+            if count % ten_percent_bucket == 0
+              elapsed_time = Time.utc - t_start
+              f_elapsed = if elapsed_time.total_seconds <= 60
+                            "#{elapsed_time.seconds}s"
+                          else
+                            "#{elapsed_time.total_minutes.to_i}m#{elapsed_time.seconds}s"
+                          end
+              @conn.edit_message(
+                @room_id,
+                event_id,
+                "#{count}/#{idx + 1} #{10 * count // ten_percent_bucket}% #{f_elapsed}"
+              )
+            end
+          end
+
+          elapsed_time = Time.utc - t_start
+          f_elapsed = if elapsed_time.total_seconds <= 60
+                        "#{elapsed_time.seconds}s"
+                      else
+                        "#{elapsed_time.total_minutes.to_i}m#{elapsed_time.seconds}s"
+                      end
+          @conn.edit_message(@room_id, event_id, "garbage-collection done in #{f_elapsed}")
+        rescue ex : Connection::ExecError
+          @conn.send_message(@room_id, "Error: #{ex.message}")
+        end
       end
 
       private def get_rooms(order = Order::Name, limit = 10, reverse = false)
-        response = @conn.get "/v1/rooms", is_admin: true, order_by: order
+        dir = (reverse) ? "b" : "f"
+        response = @conn.get "/v1/rooms", is_admin: true, order_by: order, dir: dir
         rooms = response["rooms"].as_a
 
         while (limit == 0 || rooms.size <= limit) && (next_batch = response["next_batch"]?)
-          if reverse
-            response = @conn.get "/v1/rooms", is_admin: true, order_by: order, from: next_batch, dir: "b"
-          else
-            response = @conn.get "/v1/rooms", is_admin: true, order_by: order, from: next_batch
-          end
+          response = @conn.get "/v1/rooms", is_admin: true, order_by: order, from: next_batch, dir: dir
           rooms.concat response["rooms"].as_a
         end
 
         return rooms
       end
 
-      private def purge(args)
-        room_id = args.pop?
+      private def purge(room_id : String?, silent = false) : Nil
         if room_id.nil?
           @conn.send_message @room_id, "Usage: !room purge ROOM_ID"
         end
 
-        @conn.send_message @room_id, "Purge starting, depending on the size of the room it may take a while"
+        if !silent
+          @conn.send_message @room_id, "Purge starting, depending on the size of the room it may take a while"
+        end
+
         begin
           @conn.post "/v1/purge_room", is_admin: true, data: {room_id: room_id}
         rescue ex : Connection::ExecError
           @conn.send_message @room_id, "Error: #{ex.message}"
         else
-          @conn.send_message @room_id, "#{room_id} purged"
+          if !silent
+            @conn.send_message @room_id, "#{room_id} purged"
+          end
         end
       end
 

@@ -19,38 +19,41 @@ module Matrix::Architect
 
       puts "Connecting to #{hs_url}"
       @client_sync = HTTP::Client.new(@hs_url, 443, true)
-      @user_id = self.whoami
+      @user_id = whoami
 
       puts "User's id is #{@user_id}"
     end
 
     def create_filter(filter) : String
-      response = self.post "/user/#{@user_id}/filter", filter
+      response = post "/user/#{@user_id}/filter", filter
       return response["filter_id"].as_s
     end
 
     def join(room_id)
-      self.post "/rooms/#{room_id}/join"
+      post "/rooms/#{room_id}/join"
     end
 
-    def send_message(room_id, message, html = nil)
-      tx_id = "#{Time.utc.to_unix_f}.#{@tx_id}"
-      data = {
-        body:    message,
-        msgtype: "m.text",
-      }
+    def edit_message(room_id : String, event_id : String, message : String, html : String? = nil) : Nil
+      tx_id = get_tx_id
+      new_content = get_message_content(message, html)
+      data = new_content.merge(
+        {
+          "m.new_content": new_content,
+          "m.relates_to":  {
+            rel_type: "m.replace",
+            event_id: event_id,
+          },
+        }
+      )
+      response = put "/rooms/#{room_id}/send/m.room.message/#{tx_id}", data
+    end
 
-      if !html.nil?
-        data = data.merge(
-          {
-            format:         "org.matrix.custom.html",
-            formatted_body: html,
-          }
-        )
-      end
-      self.put "/rooms/#{room_id}/send/m.room.message/#{tx_id}", data
+    def send_message(room_id : String, message : String, html : String? = nil) : String
+      tx_id = get_tx_id
+      data = get_message_content(message, html)
+      response = put "/rooms/#{room_id}/send/m.room.message/#{tx_id}", data
 
-      @tx_id += 1
+      return response["event_id"].as_s
     end
 
     def sync(channel)
@@ -69,7 +72,7 @@ module Matrix::Architect
           state:        {lazy_load_members: true},
         },
       }
-      filter_id = self.create_filter filter
+      filter_id = create_filter filter
 
       spawn do
         next_batch = nil
@@ -77,9 +80,9 @@ module Matrix::Architect
         loop do
           begin
             if next_batch.nil?
-              response = self.get "/sync", is_sync: true, filter: filter_id
+              response = get "/sync", is_sync: true, filter: filter_id
             else
-              response = self.get "/sync", is_sync: true, filter: filter_id, since: next_batch, timeout: 30_000
+              response = get "/sync", is_sync: true, filter: filter_id, since: next_batch, timeout: 30_000
             end
           rescue ExecError
             # The sync failed, this is probably due to the HS having
@@ -96,8 +99,20 @@ module Matrix::Architect
     end
 
     def whoami : String
-      response = self.get("/account/whoami")
+      response = get "/account/whoami"
       return response["user_id"].as_s
+    end
+
+    def get(route, **options)
+      return exec "GET", route, **options
+    end
+
+    def post(route, data = nil, **options)
+      return exec "POST", route, **options, body: data
+    end
+
+    def put(route, data = nil)
+      return exec "PUT", route, body: data
     end
 
     private def exec(method, route, is_sync = false, is_admin = false, body = nil, **options)
@@ -152,16 +167,27 @@ module Matrix::Architect
       end
     end
 
-    def get(route, **options)
-      return self.exec "GET", route, **options
+    private def get_message_content(message : String, html : String? = nil) : NamedTuple
+      data = {
+        body:    message,
+        msgtype: "m.text",
+      }
+
+      if !html.nil?
+        data = data.merge(
+          {
+            format:         "org.matrix.custom.html",
+            formatted_body: html,
+          }
+        )
+      end
+
+      return data
     end
 
-    def post(route, data = nil, **options)
-      return self.exec "POST", route, **options, body: data
-    end
-
-    def put(route, data = nil)
-      return self.exec "PUT", route, body: data
+    private def get_tx_id : String
+      @tx_id += 1
+      return "#{Time.utc.to_unix_f}.#{@tx_id}"
     end
   end
 end
