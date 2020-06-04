@@ -1,3 +1,4 @@
+require "log"
 require "yaml"
 
 require "./bot"
@@ -5,17 +6,23 @@ require "./bot"
 module Matrix::Architect
   VERSION = "0.1.0"
 
+  Log = ::Log.for(self)
+
   struct Config
     YAML.mapping(
       access_token: String,
+      log_level: {
+        default: ::Log::Severity::Info,
+        type:    ::Log::Severity,
+      },
       hs_url: {
-        key: "homeserver",
+        key:  "homeserver",
         type: String,
       },
       users_id: {
-        key: "users",
+        key:  "users",
         type: Array(String),
-      }
+      },
     )
   end
 
@@ -37,6 +44,7 @@ module Matrix::Architect
   def self.run
     config = self.get_config
     if !config.nil?
+      ::Log.builder.bind "*", config.log_level, ::Log::IOBackend.new
       Bot.new(config).run
     end
   end

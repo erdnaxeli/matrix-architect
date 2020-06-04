@@ -1,9 +1,17 @@
-# It assumes your homeserver is accessible using HTTPS.
+# Your homeserver's url. It must be accessible using HTTPS.
 homeserver: your.homeserver.org
-# The access token for your bot account. Create a new account and copy the
-# access token here, do not log out!
+# The access token for your bot account.
 # The account must be admin, see:
 # https://github.com/matrix-org/synapse/tree/master/docs/admin_api
 access_token: someaccesstoken
+# List of users allowed to use the bot.
 users:
   - @some:admin.org
+# Optional
+# The log level, must be either
+#   debug
+#   info (default)
+#   warning
+#   error
+#   none
+#log_level: info

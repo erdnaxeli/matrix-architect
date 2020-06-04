@@ -6,6 +6,8 @@ require "./errors"
 
 module Matrix::Architect
   class Connection
+    Log = Matrix::Architect::Log.for(self)
+
     class ExecError < Exception
     end
 
@@ -17,11 +19,11 @@ module Matrix::Architect
       @syncing = false
       @tx_id = 0
 
-      puts "Connecting to #{hs_url}"
+      Log.info { "Connecting to #{hs_url}" }
       @client_sync = HTTP::Client.new(@hs_url, 443, true)
       @user_id = whoami
 
-      puts "User's id is #{@user_id}"
+      Log.info { "User's id is #{@user_id}" }
     end
 
     def create_filter(filter) : String
@@ -84,10 +86,10 @@ module Matrix::Architect
             else
               response = get "/sync", is_sync: true, filter: filter_id, since: next_batch, timeout: 30_000
             end
-          rescue ExecError
+          rescue ex : ExecError
             # The sync failed, this is probably due to the HS having
             # difficulties, let's not harm it anymore.
-            puts "Error while syncing, waiting 10s before retry"
+            Log.error(exception: ex) { "Error while syncing, waiting 10s before retry" }
             sleep 10
             next
           end
@@ -142,7 +144,7 @@ module Matrix::Architect
         headers["Content-Type"] = "application/json"
       end
 
-      puts "#{method} #{url}"
+      Log.debug { "#{method} #{url}" }
       loop do
         response = client.exec method, url, headers, body
 
@@ -153,15 +155,14 @@ module Matrix::Architect
           when 429
             content = JSON.parse(response.body)
             error = Errors::RateLimited.new(content)
-            puts "Rate limited, retry after #{error.retry_after_ms}"
+            Log.warn { "Rate limited, retry after #{error.retry_after_ms}" }
             sleep (error.retry_after_ms + 100).milliseconds
           else
             raise ExecError.new("Invalid status code #{response.status_code}: #{response.body}")
           end
         rescue ex : JSON::ParseException
-          puts "Error while parsing JSON: #{ex.message}"
-          puts ex.inspect_with_backtrace
-          puts "Response body: #{response.body}"
+          Log.error(exception: ex) { "Error while parsing JSON" }
+          Log.error { "Response body: #{response.body}" }
           raise ExecError.new
         end
       end

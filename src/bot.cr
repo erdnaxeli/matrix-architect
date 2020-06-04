@@ -4,11 +4,13 @@ require "./events"
 
 module Matrix::Architect
   class Bot
+    Log = Matrix::Architect::Log.for(self)
+
     def initialize(@config : Config)
       @conn = Connection.new(@config.hs_url, @config.access_token)
     end
 
-    def run() : Nil
+    def run : Nil
       first_sync = true
       channel = Channel(Events::Sync).new
       @conn.sync(channel)
@@ -42,8 +44,7 @@ module Matrix::Architect
       begin
         Commands.run message.body, event.room_id, @conn
       rescue ex : Exception
-        puts %(Error while executing command "message.body")
-        puts ex.message
+        Log.error(exception: ex) { %(Error while executing command "message.body") }
       end
     end
   end
