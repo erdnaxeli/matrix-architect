@@ -44,7 +44,7 @@ module Matrix::Architect
       begin
         Commands.run message.body, event.room_id, @conn
       rescue ex : Exception
-        Log.error(exception: ex) { %(Error while executing command "message.body") }
+        Log.error(exception: ex) { %(Error while executing command "#{message.body}") }
       end
     end
   end
