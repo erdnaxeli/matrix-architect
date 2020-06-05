@@ -48,20 +48,17 @@ module Matrix::Architect
       def self.usage(str)
         str << "\
 !user deactivate USER_ID
-Deactive an account.
-
+  Deactive an account.
 !user list [--no-guests] [--user-id FILTER]
-List users.
-  --no-gests          do not list guests users
-  --user-id FILTER    filter on users' id
-
+  List users.
+    --no-gests          do not list guests users
+    --user-id FILTER    filter on users' id
 !user reset-password [--no-logout] USER_ID
-Reset a user's password and return the new password.
-  --no-logout         do not log the user out of all their devices
-
+  Reset a user's password and return the new password.
+    --no-logout         do not log the user out of all their devices
 !user query USER_ID
-Reutrn information about a specific user account.
-        "
+  Return information about a specific user account.
+"
       end
 
       private def build_users_msg(users, html = false, limit = 10)

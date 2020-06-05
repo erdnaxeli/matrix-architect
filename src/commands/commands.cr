@@ -11,11 +11,9 @@ module Matrix::Architect
       case command
       when "!help"
         msg = String.build do |str|
-          str << "!help\nDisplay this help.\n\n"
+          str << "!help\n  Display this help.\n"
           Room.usage str
-          str << "\n"
           User.usage str
-          str << "\n"
           Version.usage str
         end
         conn.send_message room_id, msg

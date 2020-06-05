@@ -17,7 +17,7 @@ module Matrix::Architect
       def self.usage(str)
         str << "\
 !version
-Get Synapse and Python versions.
+  Get Synapse and Python versions.
 "
       end
     end

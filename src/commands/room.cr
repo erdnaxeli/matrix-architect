@@ -25,28 +25,21 @@ module Matrix::Architect
 
       def self.usage(str)
         str << "\
-
 !room count
-Return the total count of rooms.
-
+  Return the total count of rooms.
 !room details ROOM_ID
-Get all details about a room.
-
+  Get all details about a room.
 !room garbage-collect
-Purge all rooms without any local users joined.
-
+  Purge all rooms without any local users joined.
 !room top-complexity
-Get top 10 rooms in complexity, aka state events number.
-
+  Get top 10 rooms in complexity, aka state events number.
 !room top-members
-Get top 10 rooms in number of members.
-
+  Get top 10 rooms in number of members.
 !room top-local-members
-Get top 10 rooms in number of local members.
-
+  Get top 10 rooms in number of local members.
 !room purge ROOM_ID
-Remove all trace of a room from your database.
-All local users must have left the room before.
+  Remove all trace of a room from your database.
+  All local users must have left the room before.
 "
       end
 
