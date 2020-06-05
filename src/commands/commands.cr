@@ -16,7 +16,7 @@ module Matrix::Architect
           User.usage str
           Version.usage str
         end
-        conn.send_message room_id, msg
+        conn.send_message(room_id, msg)
       when "!room"
         Room.run args, room_id, conn
       when "!user"

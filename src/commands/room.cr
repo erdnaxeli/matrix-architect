@@ -66,7 +66,7 @@ module Matrix::Architect
         when "purge"
           purge args.pop?
         else
-          @conn.send_message @room_id, "Unknown command"
+          @conn.send_message(@room_id, "Unknown command")
         end
       end
 
@@ -118,25 +118,25 @@ module Matrix::Architect
         begin
           rooms = get_rooms limit: 0
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error: #{ex.message}"
+          @conn.send_message(@room_id, "Error: #{ex.message}")
         else
-          @conn.send_message @room_id, "There are #{rooms.size} rooms on this HS"
+          @conn.send_message(@room_id, "There are #{rooms.size} rooms on this HS")
         end
       end
 
       private def details(room_id : String?) : Nil
         if room_id.nil?
-          @conn.send_message @room_id, "Usage: !room details ROOM_ID"
+          @conn.send_message(@room_id, "Usage: !room details ROOM_ID")
           return
         end
 
         begin
           response = @conn.get "/v1/rooms/#{room_id}", is_admin: true
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error: #{ex.message}"
+          @conn.send_message(@room_id, "Error: #{ex.message}")
         else
           msg = response.to_pretty_json
-          @conn.send_message @room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>"
+          @conn.send_message(@room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>")
         end
       end
 
@@ -250,33 +250,33 @@ module Matrix::Architect
 
       private def purge(room_id : String?, silent = false) : Nil
         if room_id.nil?
-          @conn.send_message @room_id, "Usage: !room purge ROOM_ID"
+          @conn.send_message(@room_id, "Usage: !room purge ROOM_ID")
         end
 
         if !silent
-          @conn.send_message @room_id, "Purge starting, depending on the size of the room it may take a while"
+          @conn.send_message(@room_id, "Purge starting, depending on the size of the room it may take a while")
         end
 
         begin
           @conn.post "/v1/purge_room", is_admin: true, data: {room_id: room_id}
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error: #{ex.message}"
+          @conn.send_message(@room_id, "Error: #{ex.message}")
         else
           if !silent
-            @conn.send_message @room_id, "#{room_id} purged"
+            @conn.send_message(@room_id, "#{room_id} purged")
           end
         end
       end
 
       private def top_rooms(order : Order) : Nil
         begin
-          rooms = get_rooms order
+          rooms = get_rooms(order)
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error: #{ex.message}"
+          @conn.send_message(@room_id, "Error: #{ex.message}")
         else
-          msg = build_rooms_list rooms[0, 10], order.to_s
-          html = build_rooms_list rooms[0, 10], order.to_s, is_html: true
-          @conn.send_message @room_id, msg, html
+          msg = build_rooms_list(rooms[0, 10], order.to_s)
+          html = build_rooms_list(rooms[0, 10], order.to_s, is_html: true)
+          @conn.send_message(@room_id, msg, html)
         end
       end
     end

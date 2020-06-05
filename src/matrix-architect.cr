@@ -42,7 +42,7 @@ module Matrix::Architect
   end
 
   def self.run
-    config = self.get_config
+    config = get_config
     if !config.nil?
       ::Log.builder.bind "*", config.log_level, ::Log::IOBackend.new
       Bot.new(config).run

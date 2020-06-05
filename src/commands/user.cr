@@ -25,7 +25,7 @@ module Matrix::Architect
           when "query"
             query args
           else
-            @conn.send_message @room_id, "Unknown command"
+            @conn.send_message(@room_id, "Unknown command")
           end
         rescue OptionParser::InvalidOption | OptionParser::MissingOption
           usage = case command
@@ -41,7 +41,7 @@ module Matrix::Architect
                     "unknown command"
                   end
 
-          @conn.send_message @room_id, "Invalid command, usage: !user #{usage}"
+          @conn.send_message(@room_id, "Invalid command, usage: !user #{usage}")
         end
       end
 
@@ -118,9 +118,9 @@ module Matrix::Architect
         begin
           @conn.post "/v1/deactivate/#{user_id}", is_admin: true
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error while deactivating the user: #{ex.message}"
+          @conn.send_message(@room_id, "Error while deactivating the user: #{ex.message}")
         else
-          @conn.send_message @room_id, "user deactivated"
+          @conn.send_message(@room_id, "user deactivated")
         end
       end
 
@@ -147,11 +147,11 @@ module Matrix::Architect
             users.concat(response["users"].as_a)
           end
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error while getting users list: #{ex.message}"
+          @conn.send_message(@room_id, "Error while getting users list: #{ex.message}")
         else
-          msg = build_users_msg users
-          html = build_users_msg users, html: true
-          @conn.send_message @room_id, msg, html
+          msg = build_users_msg(users)
+          html = build_users_msg(users, html: true)
+          @conn.send_message(@room_id, msg, html)
         end
       end
 
@@ -179,10 +179,10 @@ module Matrix::Architect
             is_admin: true,
           )
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error: #{ex.message}"
+          @conn.send_message(@room_id, "Error: #{ex.message}")
         else
           puts response
-          @conn.send_message @room_id, "The new password is #{password}"
+          @conn.send_message(@room_id, "The new password is #{password}")
         end
       end
 
@@ -197,12 +197,12 @@ module Matrix::Architect
         end
 
         begin
-          response = @conn.get "/v2/users/#{user_id}", is_admin: true
+          response = @conn.get("/v2/users/#{user_id}", is_admin: true)
         rescue ex : Connection::ExecError
-          @conn.send_message @room_id, "Error: #{ex.message}"
+          @conn.send_message(@room_id, "Error: #{ex.message}")
         else
           msg = response.to_pretty_json
-          @conn.send_message @room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>"
+          @conn.send_message(@room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>")
         end
       end
 

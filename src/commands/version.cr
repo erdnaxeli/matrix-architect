@@ -7,10 +7,10 @@ module Matrix::Architect
         begin
           response = conn.get "/v1/server_version", is_admin: true
         rescue ex : Connection::ExecError
-          conn.send_message room_id, "Error: #{ex.message}"
+          conn.send_message(room_id, "Error: #{ex.message}")
         else
           msg = response.to_pretty_json
-          conn.send_message room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>"
+          conn.send_message(room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>")
         end
       end
 
