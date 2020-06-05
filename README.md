@@ -18,6 +18,7 @@ Current state of API implementation:
 * [x] rooms
   * `!room count`
   * `!room details <room id>`
+  * `!room list`
   * `!room top-complexity`
   * `!room top-members`
 * [ ] server_notices

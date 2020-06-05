@@ -31,6 +31,9 @@ module Matrix::Architect
   Get all details about a room.
 !room garbage-collect
   Purge all rooms without any local users joined.
+!room list [--room-id FILTER]
+  List rooms.
+    --alias FILTER    filter on rooms's id
 !room top-complexity
   Get top 10 rooms in complexity, aka state events number.
 !room top-members
@@ -52,6 +55,8 @@ module Matrix::Architect
           details args.pop?
         when "garbage-collect"
           garbage_collect
+        when "list"
+          list args
         when "top-complexity"
           top_rooms Order::StateEvents
         when "top-local-members"
@@ -65,12 +70,13 @@ module Matrix::Architect
         end
       end
 
-      private def build_rooms_list(rooms, key, is_html = false)
+      private def build_rooms_list(rooms, key : String? = nil, limit = 0, is_html : Bool = false)
         String.build do |str|
           if is_html
             str << "<ul>"
           end
-          rooms.each do |room|
+
+          rooms[0, (limit > 0) ? limit : rooms.size].each do |room|
             if is_html
               str << "<li>"
             else
@@ -85,7 +91,12 @@ module Matrix::Architect
               str << canonical_alias << " "
             end
 
-            str << room["room_id"].as_s << " " << room[key] << "\n"
+            str << room["room_id"].as_s
+            if key
+              str << " " << room[key]
+            end
+
+            str << "\n"
 
             if is_html
               str << "</li>"
@@ -94,6 +105,11 @@ module Matrix::Architect
 
           if is_html
             str << "</ul>"
+          end
+
+          if limit > 0 && rooms.size > limit
+            str << "\nToo many rooms (" << rooms.size << "), "
+            str << "showing only the " << limit << " first ones."
           end
         end
       end
@@ -174,6 +190,40 @@ module Matrix::Architect
           @conn.edit_message(@room_id, event_id, "garbage-collection done in #{f_elapsed}")
         rescue ex : Connection::ExecError
           @conn.send_message(@room_id, "Error: #{ex.message}")
+        end
+      end
+
+      private def list(args) : Nil
+        fail = false
+        room_alias = nil
+        OptionParser.parse(args) do |parser|
+          parser.on("--alias FILTER", "filter on rooms' id") { |filter| room_alias = filter }
+          parser.invalid_option { fail = true }
+          parser.missing_option { fail = true }
+        end
+
+        if fail
+          @conn.send_message(@room_id, "Invalid command")
+          return
+        end
+
+        begin
+          rooms = get_rooms(Order::Name, limit: 0)
+        rescue ex : Connection::ExecError
+          @conn.send_message(@room_id, "Error: #{ex.message}")
+          return
+        end
+
+        if filter = room_alias
+          rooms.select! { |room| room["canonical_alias"].as_s?.try &.includes?(filter) }
+        end
+
+        if rooms.size == 0
+          @conn.send_message(@room_id, "No rooms found")
+        else
+          msg = build_rooms_list(rooms, limit: 10)
+          html = build_rooms_list(rooms, limit: 10, is_html: true)
+          @conn.send_message(@room_id, msg, html)
         end
       end
 
