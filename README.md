@@ -1,27 +1,101 @@
 # matrix-architect
 
-TODO: Write a description here
+A bot to manage your Synapse home server.
+It uses Synapse's [admin API](https://github.com/matrix-org/synapse/tree/master/docs/admin_api)
+to provides management commands.
+
+Current state of API implementation:
+* [ ] account_validity
+* [ ] delete_group
+* [ ] media_admin_api
+* [ ] purge_history_api
+* [ ] purge_remote_media
+* [x] purge_room
+  * `!room purge <room id>`
+  * `!room garbage-collect`
+* [ ] register_api
+* [ ] room_membership
+* [x] rooms
+  * `!room count`
+  * `!room details <room id>`
+  * `!room top-complexity`
+  * `!room top-members`
+* [ ] server_notices
+* [ ] shutdown_room
+* [x] user_admin_api
+  * `!user list`
+  * `!user query <user id>`
+  * `!user deactivate <user id>`
+  * `!user reset-password <user id>`
+* [x] version_api
+  * `!version`
+
+See `!help` for more details about the bot's commands.
 
 ## Installation
 
-TODO: Write installation instructions here
+You can download a static build from the [releases](https://github.com/erdnaxeli/matrix-architect/releases) page.
+
+If you want to build it yourself you need to [install Crystal](https://crystal-lang.org/install/) 0.34, then clone the code, go to the new folder and:
+
+```
+make
+```
+
+You can also build a static binary with
+```
+make static
+```
+
+Note that the static build (manually or from the releases) is not actually totally
+static (see the [Cristal wiki](https://github.com/crystal-lang/crystal/wiki/Static-Linking)).
+If you have trouble you want prefer to build yourself a not static binary.
 
 ## Usage
 
-TODO: Write usage instructions here
+Setting the configuration:
 
-## Development
+1. Create a new account for the bot on your HS, with your favorite client
+2. Log out (to discard any e2e key that would have been created)
+3. Use the script `tools/get_access_token.sh` to get a new access_token for the bot
+4. Set the new created account as
+[admin](https://github.com/matrix-org/synapse/tree/master/docs/admin_api).
+5. Copy the `config-example.yml` file to `config.yml` and fill the values
 
-TODO: Write development instructions here
+Run the bot with `./matrix-architect`. If you let the log level to "info" you should
+see some messages.
+
+You can now talk to the bot on Matrix!
 
 ## Contributing
 
-1. Fork it (<https://github.com/your-github-user/matrix-architect/fork>)
+1. Fork it (<https://github.com/erdnaxeli/matrix-architect/fork>)
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create a new Pull Request
 
+Don't forget to run `crystal tool format` on any code you commit.
+
+Your are advised to open an issue before opening a pull request.
+In that issue you can describe the context and discuss your proposal.
+
+## TODO
+
+Non ordered list of things I would like to do:
+
+* Implement more API commands:
+I am not sure we need all the admin API available though the bot, but it's sure we need more.
+* Implement new commands:
+there is probably space to implement new commands that combine different APIs,
+like the garbage-collect one.
+* Provide administration for bridges? That could be something useful.
+* Give some love to the cli executable:
+  * implement account creation in the main executable
+  * implement config generation
+  * read the config file from well known places or cli parameter
+* Test the code
+
 ## Contributors
 
-- [Alexandre Morignot](https://github.com/your-github-user) - creator and maintainer
+- [erdnaxeli](https://github.com/erdnaxeli) - creator and maintainer
