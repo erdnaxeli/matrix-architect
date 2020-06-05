@@ -141,43 +141,47 @@ module Matrix::Architect
           return
         end
 
-        @conn.send_message(@room_id, "Found #{idx + 1} rooms to garbage collect")
+        total = idx + 1
+        @conn.send_message(@room_id, "Found #{total} rooms to garbage collect")
         event_id = @conn.send_message(@room_id, "starting")
 
         begin
           count = 0
-          ten_percent_bucket = (idx + 1) // 10
-          t_start = Time.utc
+          ten_percent_bucket = (total) / 10
+          t_message = t_start = Time.utc
 
-          rooms[0...idx].each do |room|
+
+          rooms[0, total].each do |room|
             count += 1
             purge(room["room_id"].as_s, silent: true)
 
-            # update the message every 10%
-            if count % ten_percent_bucket == 0
-              elapsed_time = Time.utc - t_start
-              f_elapsed = if elapsed_time.total_seconds <= 60
-                            "#{elapsed_time.seconds}s"
-                          else
-                            "#{elapsed_time.total_minutes.to_i}m#{elapsed_time.seconds}s"
-                          end
+            # update the message every 20s
+            if (Time.utc - t_message).total_seconds >= 20
+              t_message = Time.utc
+              elapsed_time = t_message - t_start
+              f_elapsed = time_span_to_s(elapsed_time)
+              percents = 100 * count / total
               @conn.edit_message(
                 @room_id,
                 event_id,
-                "#{count}/#{idx + 1} #{10 * count // ten_percent_bucket}% #{f_elapsed}"
+                "#{count}/#{total} #{percents}% #{f_elapsed}"
               )
             end
           end
 
           elapsed_time = Time.utc - t_start
-          f_elapsed = if elapsed_time.total_seconds <= 60
-                        "#{elapsed_time.seconds}s"
-                      else
-                        "#{elapsed_time.total_minutes.to_i}m#{elapsed_time.seconds}s"
-                      end
+          f_elapsed = time_span_to_s(elapsed_time)
           @conn.edit_message(@room_id, event_id, "garbage-collection done in #{f_elapsed}")
         rescue ex : Connection::ExecError
           @conn.send_message(@room_id, "Error: #{ex.message}")
+        end
+      end
+
+      private def time_span_to_s(span : Time::Span) : String
+        if span.total_seconds <= 60
+          return "#{span.seconds}s"
+        else
+          return "#{span.total_minutes.to_i}m#{span.seconds}s"
         end
       end
 
