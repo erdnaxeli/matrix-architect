@@ -22,7 +22,8 @@ Current state of API implementation:
   * `!room top-complexity`
   * `!room top-members`
 * [ ] server_notices
-* [ ] shutdown_room
+* [x] shutdown_room
+  * `!room shutdown <room id>`
 * [x] user_admin_api
   * `!user list`
   * `!user query <user id>`

@@ -43,6 +43,8 @@ module Matrix::Architect
 !room purge ROOM_ID
   Remove all trace of a room from your database.
   All local users must have left the room before.
+!room shutdown ROOM_ID
+  Shutdown a room.
 "
       end
 
@@ -65,6 +67,8 @@ module Matrix::Architect
           top_rooms Order::JoinedMembers
         when "purge"
           purge args.pop?
+        when "shutdown"
+          shutdown args.pop?
         else
           @conn.send_message(@room_id, "Unknown command")
         end
@@ -166,10 +170,9 @@ module Matrix::Architect
           ten_percent_bucket = (total) / 10
           t_message = t_start = Time.utc
 
-
           rooms[0, total].each do |room|
             count += 1
-            purge(room["room_id"].as_s, silent: true)
+            do_purge(room["room_id"].as_s)
 
             # update the message every 20s
             if (Time.utc - t_message).total_seconds >= 20
@@ -248,23 +251,59 @@ module Matrix::Architect
         return rooms
       end
 
-      private def purge(room_id : String?, silent = false) : Nil
+      private def purge(room_id : String?) : Nil
         if room_id.nil?
           @conn.send_message(@room_id, "Usage: !room purge ROOM_ID")
+          return
         end
 
-        if !silent
-          @conn.send_message(@room_id, "Purge starting, depending on the size of the room it may take a while")
+        msg = "Purge starting, depending on the size of the room it may take a while"
+        event_id = @conn.send_message(@room_id, msg)
+        done, error = Channel(Nil).new, Channel(Nil).new
+
+        start = Time.utc
+        spawn do
+          if id = room_id
+            begin
+              do_purge(id)
+              done.close
+            rescue ex : Connection::ExecError
+              @conn.send_message(@room_id, "Error while purging room #{id}: #{ex.message}")
+              error.close
+            end
+          end
+        end
+
+        loop do
+          select
+          when done.receive?
+            @conn.edit_message(@room_id, event_id, "#{room_id} purged in #{(Time.utc - start).total_seconds}s")
+            break
+          when error.receive?
+            break
+          when timeout 20.seconds
+            @conn.edit_message(@room_id, event_id, "#{msg}: #{(Time.utc - start).total_seconds}s")
+          end
+        end
+      end
+
+      private def do_purge(room_id : String) : Nil
+        @conn.post("/v1/purge_room", is_admin: true, data: {room_id: room_id})
+      end
+
+      private def shutdown(room_id : String?) : Nil
+        if room_id.nil?
+          @conn.send_message(@room_id, "Usage: !room shutdown ROOM_ID")
+          return
         end
 
         begin
-          @conn.post "/v1/purge_room", is_admin: true, data: {room_id: room_id}
+          response = @conn.post("/v1/shutdown_room/#{room_id}", is_admin: true, data: {new_room_user_id: @conn.user_id})
         rescue ex : Connection::ExecError
           @conn.send_message(@room_id, "Error: #{ex.message}")
         else
-          if !silent
-            @conn.send_message(@room_id, "#{room_id} purged")
-          end
+          msg = response.to_pretty_json
+          @conn.send_message(@room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>")
         end
       end
 
