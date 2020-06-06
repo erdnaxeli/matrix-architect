@@ -84,7 +84,7 @@ module Matrix::Architect
             if next_batch.nil?
               response = get "/sync", is_sync: true, filter: filter_id
             else
-              response = get "/sync", is_sync: true, filter: filter_id, since: next_batch, timeout: 30_000
+              response = get "/sync", is_sync: true, filter: filter_id, since: next_batch, timeout: 300_000
             end
           rescue ex : ExecError
             # The sync failed, this is probably due to the HS having
