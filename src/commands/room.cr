@@ -1,10 +1,11 @@
 require "option_parser"
 
 require "../connection"
+require "./base"
 
 module Matrix::Architect
   module Commands
-    class Room
+    class Room < Base
       enum Order
         JoinedLocalMembers
         JoinedMembers
@@ -259,30 +260,18 @@ module Matrix::Architect
 
         msg = "Purge starting, depending on the size of the room it may take a while"
         event_id = @conn.send_message(@room_id, msg)
-        done, error = Channel(Nil).new, Channel(Nil).new
 
-        start = Time.utc
-        spawn do
-          if id = room_id
-            begin
+        run_with_progress(2.seconds) do |runner|
+          runner.command do
+            if id = room_id
               do_purge(id)
-              done.close
-            rescue ex : Connection::ExecError
-              @conn.send_message(@room_id, "Error while purging room #{id}: #{ex.message}")
-              error.close
             end
           end
-        end
-
-        loop do
-          select
-          when done.receive?
-            @conn.edit_message(@room_id, event_id, "#{room_id} purged in #{(Time.utc - start).total_seconds}s")
-            break
-          when error.receive?
-            break
-          when timeout 20.seconds
-            @conn.edit_message(@room_id, event_id, "#{msg}: #{(Time.utc - start).total_seconds}s")
+          runner.on_progress do |time|
+            @conn.edit_message(@room_id, event_id, "#{msg}: #{time.total_seconds.round}s")
+          end
+          runner.on_success do |time|
+            @conn.edit_message(@room_id, event_id, "#{room_id} purged in #{time.total_seconds.round}s")
           end
         end
       end
@@ -297,13 +286,17 @@ module Matrix::Architect
           return
         end
 
-        begin
-          response = @conn.post("/v1/shutdown_room/#{room_id}", is_admin: true, data: {new_room_user_id: @conn.user_id})
-        rescue ex : Connection::ExecError
-          @conn.send_message(@room_id, "Error: #{ex.message}")
-        else
-          msg = response.to_pretty_json
-          @conn.send_message(@room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>")
+        event_id = @conn.send_message(@room_id, "Shuting down room #{room_id}")
+        run_with_progress(20.seconds) do |runner|
+          runner.command do
+            @conn.post("/v1/shutdown_room/#{room_id}", is_admin: true, data: {new_room_user_id: @conn.user_id})
+          end
+          runner.on_progress do |time|
+            @conn.edit_message(@room_id, event_id, "Shuting down room #{room_id}: #{time.total_seconds.round}s")
+          end
+          runner.on_success do |time|
+            @conn.edit_message(@room_id, event_id, "#{room_id} shutted down in #{time.total_seconds.round}s")
+          end
         end
       end
 
