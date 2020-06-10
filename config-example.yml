@@ -11,7 +11,7 @@ users:
 # The log level, must be either
 #   debug
 #   info (default)
-#   warning
+#   warn
 #   error
 #   none
 #log_level: info

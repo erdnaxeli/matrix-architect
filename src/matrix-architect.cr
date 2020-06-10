@@ -9,21 +9,17 @@ module Matrix::Architect
   Log = ::Log.for(self)
 
   struct Config
-    YAML.mapping(
-      access_token: String,
-      log_level: {
-        default: ::Log::Severity::Info,
-        type:    ::Log::Severity,
-      },
-      hs_url: {
-        key:  "homeserver",
-        type: String,
-      },
-      users_id: {
-        key:  "users",
-        type: Array(String),
-      },
-    )
+    include YAML::Serializable
+    include YAML::Serializable::Strict
+
+    property access_token : String
+    property log_level = ::Log::Severity::Info
+
+    @[YAML::Field(key: "homeserver")]
+    property hs_url : String
+
+    @[YAML::Field(key: "users")]
+    property users_id : Array(String)
   end
 
   def self.get_config
@@ -44,7 +40,7 @@ module Matrix::Architect
   def self.run
     config = get_config
     if !config.nil?
-      ::Log.builder.bind "*", config.log_level, ::Log::IOBackend.new
+      ::Log.setup(config.log_level)
       Bot.new(config).run
     end
   end
