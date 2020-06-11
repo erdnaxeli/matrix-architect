@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="generator" content="Crystal Docs 0.34.0">
+<meta name="crystal_docs.project_version" content="lint-dev">
+<meta name="crystal_docs.project_name" content="matrix-architect">
+
+
+<link href="../../../../css/style.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="../../../../js/doc.js"></script>
+
+<svg class="hidden">
+  <symbol id="octicon-link" viewBox="0 0 16 16">
+    <path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path>
+  </symbol>
+</svg>
+
+  <meta id="repository-name" content="matrix-architect">
+  <title>Matrix::Architect::Commands::Room::Order - matrix-architect lint-dev</title>
+  <script type="text/javascript">
+    CrystalDocs.base_path = "../../../../";
+  </script>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="search-box">
+      <input type="search" class="search-input" placeholder="Search..." spellcheck="false" aria-label="Search">
+    </div>
+
+    <div class="project-summary">
+      <h1 class="project-name">
+        <a href="../../../../index.html">
+          matrix-architect
+        </a>
+      </h1>
+
+      <span class="project-version">
+        lint-dev
+      </span>
+    </div>
+  </div>
+
+  <div class="search-results" class="hidden">
+    <ul class="search-list"></ul>
+  </div>
+
+  <div class="types-list">
+    <ul>
+  
+  <li class="parent open current" data-id="matrix-architect/Matrix" data-name="matrix">
+      <a href="../../../../Matrix.html">Matrix</a>
+      
+        <ul>
+  
+  <li class="parent open current" data-id="matrix-architect/Matrix/Architect" data-name="matrix::architect">
+      <a href="../../../../Matrix/Architect.html">Architect</a>
+      
+        <ul>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Bot" data-name="matrix::architect::bot">
+      <a href="../../../../Matrix/Architect/Bot.html">Bot</a>
+      
+    </li>
+  
+  <li class="parent open current" data-id="matrix-architect/Matrix/Architect/Commands" data-name="matrix::architect::commands">
+      <a href="../../../../Matrix/Architect/Commands.html">Commands</a>
+      
+        <ul>
+  
+  <li class="parent " data-id="matrix-architect/Matrix/Architect/Commands/Base" data-name="matrix::architect::commands::base">
+      <a href="../../../../Matrix/Architect/Commands/Base.html">Base</a>
+      
+        <ul>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Commands/Base/Runner" data-name="matrix::architect::commands::base::runner">
+      <a href="../../../../Matrix/Architect/Commands/Base/Runner.html">Runner</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent open current" data-id="matrix-architect/Matrix/Architect/Commands/Room" data-name="matrix::architect::commands::room">
+      <a href="../../../../Matrix/Architect/Commands/Room.html">Room</a>
+      
+        <ul>
+  
+  <li class=" current" data-id="matrix-architect/Matrix/Architect/Commands/Room/Order" data-name="matrix::architect::commands::room::order">
+      <a href="../../../../Matrix/Architect/Commands/Room/Order.html">Order</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Commands/RunnerError" data-name="matrix::architect::commands::runnererror">
+      <a href="../../../../Matrix/Architect/Commands/RunnerError.html">RunnerError</a>
+      
+    </li>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Commands/User" data-name="matrix::architect::commands::user">
+      <a href="../../../../Matrix/Architect/Commands/User.html">User</a>
+      
+    </li>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Commands/Version" data-name="matrix::architect::commands::version">
+      <a href="../../../../Matrix/Architect/Commands/Version.html">Version</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Config" data-name="matrix::architect::config">
+      <a href="../../../../Matrix/Architect/Config.html">Config</a>
+      
+    </li>
+  
+  <li class="parent " data-id="matrix-architect/Matrix/Architect/Connection" data-name="matrix::architect::connection">
+      <a href="../../../../Matrix/Architect/Connection.html">Connection</a>
+      
+        <ul>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Connection/ExecError" data-name="matrix::architect::connection::execerror">
+      <a href="../../../../Matrix/Architect/Connection/ExecError.html">ExecError</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="matrix-architect/Matrix/Architect/Errors" data-name="matrix::architect::errors">
+      <a href="../../../../Matrix/Architect/Errors.html">Errors</a>
+      
+        <ul>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Errors/RateLimited" data-name="matrix::architect::errors::ratelimited">
+      <a href="../../../../Matrix/Architect/Errors/RateLimited.html">RateLimited</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+  <li class="parent " data-id="matrix-architect/Matrix/Architect/Events" data-name="matrix::architect::events">
+      <a href="../../../../Matrix/Architect/Events.html">Events</a>
+      
+        <ul>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Events/Invite" data-name="matrix::architect::events::invite">
+      <a href="../../../../Matrix/Architect/Events/Invite.html">Invite</a>
+      
+    </li>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Events/Message" data-name="matrix::architect::events::message">
+      <a href="../../../../Matrix/Architect/Events/Message.html">Message</a>
+      
+    </li>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Events/RoomEvent" data-name="matrix::architect::events::roomevent">
+      <a href="../../../../Matrix/Architect/Events/RoomEvent.html">RoomEvent</a>
+      
+    </li>
+  
+  <li class=" " data-id="matrix-architect/Matrix/Architect/Events/Sync" data-name="matrix::architect::events::sync">
+      <a href="../../../../Matrix/Architect/Events/Sync.html">Sync</a>
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+      
+    </li>
+  
+</ul>
+
+  </div>
+</div>
+
+
+<div class="main-content">
+<h1 class="type-name">
+
+  <span class="kind">enum</span> Matrix::Architect::Commands::Room::Order
+
+</h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <h2>
+    <a id="defined-in" class="anchor" href="#defined-in">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Defined in:
+  </h2>
+  
+
+
+
+  
+    <h2>
+      <a id="enum-members" class="anchor" href="#enum-members">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+      Enum Members
+    </h2>
+  
+  <dl>
+    
+      <dt class="entry-const" id="JoinedLocalMembers">
+        <strong>JoinedLocalMembers</strong> = <code><span class="n">0</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="JoinedMembers">
+        <strong>JoinedMembers</strong> = <code><span class="n">1</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="Name">
+        <strong>Name</strong> = <code><span class="n">2</span></code>
+      </dt>
+      
+    
+      <dt class="entry-const" id="StateEvents">
+        <strong>StateEvents</strong> = <code><span class="n">3</span></code>
+      </dt>
+      
+    
+  </dl>
+
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-summary" class="anchor" href="#instance-method-summary">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Summary
+  </h2>
+  <ul class="list-summary">
+    
+      <li class="entry-summary">
+        <a href="#joined_local_members?-instance-method" class="signature"><strong>#joined_local_members?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#joined_members?-instance-method" class="signature"><strong>#joined_members?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#name?-instance-method" class="signature"><strong>#name?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#state_events?-instance-method" class="signature"><strong>#state_events?</strong></a>
+        
+      </li>
+    
+      <li class="entry-summary">
+        <a href="#to_s-instance-method" class="signature"><strong>#to_s</strong></a>
+        
+          <div class="summary"><p>Returns a <code>String</code> representation of this enum member.</p></div>
+        
+      </li>
+    
+  </ul>
+
+
+
+
+
+<div class="methods-inherited">
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+    
+
+
+    
+
+
+    
+
+
+  
+</div>
+
+
+
+
+
+
+  <h2>
+    <a id="instance-method-detail" class="anchor" href="#instance-method-detail">
+  <svg class="octicon-link" aria-hidden="true">
+    <use href="#octicon-link"/>
+  </svg>
+</a>
+    Instance Method Detail
+  </h2>
+  
+    <div class="entry-detail" id="joined_local_members?-instance-method">
+      <div class="signature">
+        
+        def <strong>joined_local_members?</strong>
+
+        <a class="method-permalink" href="#joined_local_members?-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="joined_members?-instance-method">
+      <div class="signature">
+        
+        def <strong>joined_members?</strong>
+
+        <a class="method-permalink" href="#joined_members?-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="name?-instance-method">
+      <div class="signature">
+        
+        def <strong>name?</strong>
+
+        <a class="method-permalink" href="#name?-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="state_events?-instance-method">
+      <div class="signature">
+        
+        def <strong>state_events?</strong>
+
+        <a class="method-permalink" href="#state_events?-instance-method">#</a>
+      </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+    <div class="entry-detail" id="to_s-instance-method">
+      <div class="signature">
+        
+        def <strong>to_s</strong>
+
+        <a class="method-permalink" href="#to_s-instance-method">#</a>
+      </div>
+      
+        <div class="doc">
+          
+            <div class="doc-inherited">
+              Description copied from struct Enum
+            </div>
+          
+          <p>Returns a <code>String</code> representation of this enum member.
+In the case of regular enums, this is just the name of the member.
+In the case of flag enums, it's the names joined by vertical bars, or "None",
+if the value is zero.</p>
+
+<p>If an enum's value doesn't match a member's value, the raw value
+is returned as a string.</p>
+
+<pre><code><span class="t">Color</span><span class="t">::</span><span class="t">Red</span>.to_s                     <span class="c"># =&gt; &quot;Red&quot;</span>
+<span class="t">IOMode</span><span class="t">::</span><span class="t">None</span>.to_s                   <span class="c"># =&gt; &quot;None&quot;</span>
+(<span class="t">IOMode</span><span class="t">::</span><span class="t">Read</span> <span class="o">|</span> <span class="t">IOMode</span><span class="t">::</span><span class="t">Write</span>).to_s <span class="c"># =&gt; &quot;Read | Write&quot;</span>
+
+<span class="t">Color</span>.<span class="k">new</span>(<span class="n">10</span>).to_s <span class="c"># =&gt; &quot;10&quot;</span></code></pre>
+        </div>
+      
+      <br/>
+      <div>
+        
+      </div>
+    </div>
+  
+
+
+
+
+</div>
+
+</body>
+</html>
