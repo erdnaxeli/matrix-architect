@@ -28,7 +28,7 @@ module Matrix::Architect
 
     def create_filter(filter) : String
       response = post "/user/#{@user_id}/filter", filter
-      return response["filter_id"].as_s
+      response["filter_id"].as_s
     end
 
     def join(room_id)
@@ -47,7 +47,7 @@ module Matrix::Architect
           },
         }
       )
-      response = put "/rooms/#{room_id}/send/m.room.message/#{tx_id}", data
+      put "/rooms/#{room_id}/send/m.room.message/#{tx_id}", data
     end
 
     def send_message(room_id : String, message : String, html : String? = nil) : String
@@ -55,7 +55,7 @@ module Matrix::Architect
       data = get_message_content(message, html)
       response = put "/rooms/#{room_id}/send/m.room.message/#{tx_id}", data
 
-      return response["event_id"].as_s
+      response["event_id"].as_s
     end
 
     def sync(channel)
@@ -102,19 +102,19 @@ module Matrix::Architect
 
     def whoami : String
       response = get "/account/whoami"
-      return response["user_id"].as_s
+      response["user_id"].as_s
     end
 
     def get(route, **options)
-      return exec "GET", route, **options
+      exec "GET", route, **options
     end
 
     def post(route, data = nil, **options)
-      return exec "POST", route, **options, body: data
+      exec "POST", route, **options, body: data
     end
 
     def put(route, data = nil)
-      return exec "PUT", route, body: data
+      exec "PUT", route, body: data
     end
 
     private def exec(method, route, is_sync = false, is_admin = false, body = nil, **options)
@@ -183,12 +183,12 @@ module Matrix::Architect
         )
       end
 
-      return data
+      data
     end
 
     private def get_tx_id : String
       @tx_id += 1
-      return "#{Time.utc.to_unix_f}.#{@tx_id}"
+      "#{Time.utc.to_unix_f}.#{@tx_id}"
     end
   end
 end

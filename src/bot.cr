@@ -41,11 +41,9 @@ module Matrix::Architect
     end
 
     def exec_command(message, event) : Nil
-      begin
-        Commands.run message.body, event.room_id, @conn
-      rescue ex : Exception
-        Log.error(exception: ex) { %(Error while executing command "#{message.body}") }
-      end
+      Commands.run message.body, event.room_id, @conn
+    rescue ex : Exception
+      Log.error(exception: ex) { %(Error while executing command "#{message.body}") }
     end
   end
 end
