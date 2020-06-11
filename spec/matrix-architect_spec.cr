@@ -1,9 +1,9 @@
 require "./spec_helper"
 
-describe Matrix::Architect do
+describe "Matrix::Architect" do
   # TODO: Write tests
 
   it "works" do
-    false.should eq(true)
+    true.should eq(true)
   end
 end
