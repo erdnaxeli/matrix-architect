@@ -82,30 +82,7 @@ module Matrix::Architect
           end
 
           rooms[0, (limit > 0) ? limit : rooms.size].each do |room|
-            if is_html
-              str << "<li>"
-            else
-              str << "* "
-            end
-
-            if name = room["name"].as_s?
-              str << name << " "
-            end
-
-            if canonical_alias = room["canonical_alias"].as_s?
-              str << canonical_alias << " "
-            end
-
-            str << room["room_id"].as_s
-            if key
-              str << " " << room[key]
-            end
-
-            str << "\n"
-
-            if is_html
-              str << "</li>"
-            end
+            build_room_list(room, str, key, is_html)
           end
 
           if is_html
@@ -119,14 +96,39 @@ module Matrix::Architect
         end
       end
 
-      private def count
-        begin
-          rooms = get_rooms limit: 0
-        rescue ex : Connection::ExecError
-          @conn.send_message(@room_id, "Error: #{ex.message}")
+      private def build_room_list(room, str, key : String? = nil, is_html : Bool = false)
+        if is_html
+          str << "<li>"
         else
-          @conn.send_message(@room_id, "There are #{rooms.size} rooms on this HS")
+          str << "* "
         end
+
+        if name = room["name"].as_s?
+          str << name << " "
+        end
+
+        if canonical_alias = room["canonical_alias"].as_s?
+          str << canonical_alias << " "
+        end
+
+        str << room["room_id"].as_s
+        if key
+          str << " " << room[key]
+        end
+
+        str << "\n"
+
+        if is_html
+          str << "</li>"
+        end
+      end
+
+      private def count
+        rooms = get_rooms limit: 0
+      rescue ex : Connection::ExecError
+        @conn.send_message(@room_id, "Error: #{ex.message}")
+      else
+        @conn.send_message(@room_id, "There are #{rooms.size} rooms on this HS")
       end
 
       private def details(room_id : String?) : Nil
@@ -168,7 +170,6 @@ module Matrix::Architect
 
         begin
           count = 0
-          ten_percent_bucket = (total) / 10
           t_message = t_start = Time.utc
 
           rooms[0, total].each do |room|
@@ -233,9 +234,9 @@ module Matrix::Architect
 
       private def time_span_to_s(span : Time::Span) : String
         if span.total_seconds <= 60
-          return "#{span.seconds}s"
+          "#{span.seconds}s"
         else
-          return "#{span.total_minutes.to_i}m#{span.seconds}s"
+          "#{span.total_minutes.to_i}m#{span.seconds}s"
         end
       end
 
@@ -249,7 +250,7 @@ module Matrix::Architect
           rooms.concat response["rooms"].as_a
         end
 
-        return rooms
+        rooms
       end
 
       private def purge(room_id : String?) : Nil
@@ -301,15 +302,13 @@ module Matrix::Architect
       end
 
       private def top_rooms(order : Order) : Nil
-        begin
-          rooms = get_rooms(order)
-        rescue ex : Connection::ExecError
-          @conn.send_message(@room_id, "Error: #{ex.message}")
-        else
-          msg = build_rooms_list(rooms[0, 10], order.to_s)
-          html = build_rooms_list(rooms[0, 10], order.to_s, is_html: true)
-          @conn.send_message(@room_id, msg, html)
-        end
+        rooms = get_rooms(order)
+      rescue ex : Connection::ExecError
+        @conn.send_message(@room_id, "Error: #{ex.message}")
+      else
+        msg = build_rooms_list(rooms[0, 10], order.to_s)
+        html = build_rooms_list(rooms[0, 10], order.to_s, is_html: true)
+        @conn.send_message(@room_id, msg, html)
       end
     end
   end

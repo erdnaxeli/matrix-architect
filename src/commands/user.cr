@@ -62,7 +62,7 @@ module Matrix::Architect
       end
 
       private def build_users_msg(users, html = false, limit = 10)
-        return String.build do |str|
+        String.build do |str|
           str << users.size << " users found:\n"
 
           if html

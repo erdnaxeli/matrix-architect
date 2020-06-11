@@ -23,18 +23,13 @@ module Matrix::Architect
   end
 
   def self.get_config
-    begin
-      config = File.open("config.yml") do |file|
-        Config.from_yaml(file)
-      end
-    rescue File::NotFoundError
-      puts "Configuration file 'config.yml' not found"
-      return
-    rescue ex : YAML::ParseException
-      puts "Error while reading config file: #{ex.message}"
+    File.open("config.yml") do |file|
+      return Config.from_yaml(file)
     end
-
-    return config
+  rescue File::NotFoundError
+    puts "Configuration file 'config.yml' not found"
+  rescue ex : YAML::ParseException
+    puts "Error while reading config file: #{ex.message}"
   end
 
   def self.run
