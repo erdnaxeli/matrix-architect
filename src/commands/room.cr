@@ -17,13 +17,6 @@ module Matrix::Architect
         end
       end
 
-      def initialize(@room_id : String, @conn : Connection)
-      end
-
-      def self.run(args, room_id, conn)
-        Room.new(room_id, conn).run args
-      end
-
       def self.usage(str)
         str << "\
 !room count
