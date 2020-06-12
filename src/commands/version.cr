@@ -1,22 +1,21 @@
 require "../connection"
+require "./base"
 
 module Matrix::Architect
   module Commands
-    module Version
-      def self.run(args, room_id, conn)
-        response = conn.get "/v1/server_version", is_admin: true
-      rescue ex : Connection::ExecError
-        conn.send_message(room_id, "Error: #{ex.message}")
-      else
-        msg = response.to_pretty_json
-        conn.send_message(room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>")
-      end
-
-      def self.usage(str)
-        str << "\
-!version
-  Get Synapse and Python versions.
-"
+    class Version < Base
+      def parse(parser, job) : Nil
+        parser.banner = "!version"
+        job.exec do
+          begin
+            response = @conn.get "/v1/server_version", is_admin: true
+          rescue ex : Connection::ExecError
+            send_message "Error: #{ex.message}"
+          else
+            msg = response.to_pretty_json
+            send_message "```\n#{msg}\n```", "<pre>#{msg}</pre>"
+          end
+        end
       end
     end
   end
