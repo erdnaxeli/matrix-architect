@@ -40,5 +40,3 @@ module Matrix::Architect
     end
   end
 end
-
-Matrix::Architect.run

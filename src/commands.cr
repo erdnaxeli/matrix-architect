@@ -54,7 +54,7 @@ module Matrix::Architect
       end
     end
 
-    def self.run(line, room_id, conn) : Nil
+    def self.run(line : String, room_id : String, conn : Connection) : Nil
       args = line.split(" ").reject { |v| v == "" }
       if command = args[0]?
         if command[0] != '!'
@@ -92,7 +92,7 @@ module Matrix::Architect
         job.help
       end
       parser.missing_option { job.help }
-      parser.unknown_args do |before, after|
+      parser.unknown_args do |_, _|
         # `unknown_args` is always called last, so if no job have been registered
         # when we got here we just show the help.
         # This acts like a `missing_subcommand` method.

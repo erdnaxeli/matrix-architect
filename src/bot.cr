@@ -7,7 +7,7 @@ module Matrix::Architect
     Log = Matrix::Architect::Log.for(self)
 
     def initialize(@config : Config)
-      @conn = Connection.new(@config.hs_url, @config.access_token)
+      @conn = ConnectionImpl.new(@config.hs_url, @config.access_token)
     end
 
     def run : Nil

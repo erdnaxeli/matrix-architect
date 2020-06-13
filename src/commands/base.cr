@@ -63,7 +63,7 @@ module Matrix::Architect
       end
 
       # Creates a new instance of the command and runs it.
-      def self.run(args, room_id : String, conn : Matrix::Architect::Connection) : Nil
+      def self.run(args, room_id : String, conn : Connection) : Nil
         self.new(room_id, conn).run args
       end
 

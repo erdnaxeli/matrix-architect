@@ -1,2 +1,2 @@
 require "spec"
-# require "../src/matrix-architect"
+require "../src/matrix-architect"
