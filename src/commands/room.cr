@@ -19,52 +19,73 @@ module Matrix::Architect
 
       def self.usage(str)
         str << "\
-!room count
-  Return the total count of rooms.
-!room details ROOM_ID
-  Get all details about a room.
-!room garbage-collect
-  Purge all rooms without any local users joined.
 !room list [--room-id FILTER]
-  List rooms.
     --alias FILTER    filter on rooms's id
 !room top-complexity
-  Get top 10 rooms in complexity, aka state events number.
 !room top-members
-  Get top 10 rooms in number of members.
 !room top-local-members
-  Get top 10 rooms in number of local members.
 !room purge ROOM_ID
-  Remove all trace of a room from your database.
-  All local users must have left the room before.
 !room shutdown ROOM_ID
-  Shutdown a room.
 "
       end
 
-      def run(args) : Nil
-        command = args.shift?
-        case command
-        when "count"
-          count
-        when "details"
-          details args.pop?
-        when "garbage-collect"
-          garbage_collect
-        when "list"
-          list args
-        when "top-complexity"
-          top_rooms Order::StateEvents
-        when "top-local-members"
-          top_rooms Order::JoinedLocalMembers
-        when "top-members"
-          top_rooms Order::JoinedMembers
-        when "purge"
-          purge args.pop?
-        when "shutdown"
-          shutdown args.pop?
-        else
-          @conn.send_message(@room_id, "Unknown command")
+      def parse(parser, job) : Nil
+        parser.banner = "!room COMMAND"
+        parser.on("count", "return the total count of rooms") do
+          parser.banner = "!room count"
+          job.exec { count }
+        end
+        parser.on("details", "get all details about a room") do
+          parser.banner = "!room details ROOM_ID"
+          parser.unknown_args do |before, _|
+            if before.size != 1
+              job.help
+            else
+              job.exec { details(before[0]) }
+            end
+          end
+        end
+        parser.on("garbage-collect", "purge all rooms without any local users joined") do
+          parser.banner = "!room garbage-collect"
+          job.exec { garbage_collect }
+        end
+        parser.on("list", "list rooms") do
+          room_alias = nil
+          parser.banner = "!room list [--alias FILTER]"
+          parser.on("--alias FILTER", "filter on room's id") { |filter| room_alias = filter }
+
+          job.exec { list room_alias }
+        end
+        parser.on("top-complexity", "get top 10 rooms by complexity, aka state events number") do
+          parser.banner = "!room top-complexity"
+          job.exec { top_rooms(Order::StateEvents) }
+        end
+        parser.on("top-local-members", "get top 10 rooms by local members count") do
+          parser.banner = "!room top-local-member"
+          job.exec { top_rooms(Order::JoinedLocalMembers) }
+        end
+        parser.on("top-members", "get top 10 rooms by members count") do
+          parser.banner = "!room top-members"
+          job.exec { top_rooms(Order::JoinedMembers) }
+        end
+        parser.on("purge", "remove all traces of a room from your database") do
+          parser.banner = "!room purge ROOM_ID"
+          parser.unknown_args do |before, _|
+            if before.size != 1
+              job.help
+            else
+              job.exec { purge(before[0]) }
+            end
+          end
+        end
+        parser.on("shutdown", "make all local users leave a room and remove its local aliases") do
+          parser.unknown_args do |before, _|
+            if before.size != 1
+              job.help
+            else
+              job.exec { shutdown(before[0]) }
+            end
+          end
         end
       end
 
@@ -191,20 +212,7 @@ module Matrix::Architect
         end
       end
 
-      private def list(args) : Nil
-        fail = false
-        room_alias = nil
-        OptionParser.parse(args) do |parser|
-          parser.on("--alias FILTER", "filter on rooms' id") { |filter| room_alias = filter }
-          parser.invalid_option { fail = true }
-          parser.missing_option { fail = true }
-        end
-
-        if fail
-          @conn.send_message(@room_id, "Invalid command")
-          return
-        end
-
+      private def list(room_alias : String? = nil) : Nil
         begin
           rooms = get_rooms(Order::Name, limit: 0)
         rescue ex : Connection::ExecError
@@ -246,12 +254,7 @@ module Matrix::Architect
         rooms
       end
 
-      private def purge(room_id : String?) : Nil
-        if room_id.nil?
-          @conn.send_message(@room_id, "Usage: !room purge ROOM_ID")
-          return
-        end
-
+      private def purge(room_id : String) : Nil
         msg = "Purge starting, depending on the size of the room it may take a while"
         event_id = @conn.send_message(@room_id, msg)
 
@@ -274,12 +277,7 @@ module Matrix::Architect
         @conn.post("/v1/purge_room", is_admin: true, data: {room_id: room_id})
       end
 
-      private def shutdown(room_id : String?) : Nil
-        if room_id.nil?
-          @conn.send_message(@room_id, "Usage: !room shutdown ROOM_ID")
-          return
-        end
-
+      private def shutdown(room_id : String) : Nil
         event_id = @conn.send_message(@room_id, "Shuting down room #{room_id}")
         run_with_progress(20.seconds) do |runner|
           runner.command do
