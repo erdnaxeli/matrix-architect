@@ -17,23 +17,31 @@ module Matrix::Architect
         end
       end
 
-      def self.usage(str)
-        str << "\
-!room list [--room-id FILTER]
-    --alias FILTER    filter on rooms's id
-!room top-complexity
-!room top-members
-!room top-local-members
-!room purge ROOM_ID
-!room shutdown ROOM_ID
-"
-      end
-
       def parse(parser, job) : Nil
         parser.banner = "!room COMMAND"
         parser.on("count", "return the total count of rooms") do
           parser.banner = "!room count"
           job.exec { count }
+        end
+        parser.on("delete", "make all users leave a room and purge it") do
+          block = false
+          shutdown = false
+          message = nil
+
+          parser.banner = "!room delete [--block] [--purge] [--msg MSG] ROOM_ID"
+          parser.on("--block", "prevent joining this room again") do
+            block = true
+          end
+          parser.on("--msg MSG", "make all the users join a new room where a message will be shown") do |msg|
+            message = msg
+          end
+          parser.unknown_args do |before, _|
+            if before.size != 1
+              job.help
+            else
+              job.exec { delete(before[0], block, message) }
+            end
+          end
         end
         parser.on("details", "get all details about a room") do
           parser.banner = "!room details ROOM_ID"
@@ -143,6 +151,27 @@ module Matrix::Architect
         @conn.send_message(@room_id, "Error: #{ex.message}")
       else
         @conn.send_message(@room_id, "There are #{rooms.size} rooms on this HS")
+      end
+
+      private def delete(room_id : String, block = false, message : String? = nil)
+        if message.nil?
+          data = {block: block}
+        else
+          data = {
+            block:            block,
+            message:          message,
+            new_room_user_id: @conn.user_id,
+          }
+        end
+
+        begin
+          response = @conn.post("/v1/rooms/#{room_id}/delete", is_admin: true, data: data)
+        rescue ex : Connection::ExecError
+          @conn.send_message(@room_id, "Error: #{ex.message}")
+        else
+          msg = response.to_pretty_json
+          @conn.send_message(@room_id, "```\n#{msg}\n```", "<pre>#{msg}</pre>")
+        end
       end
 
       private def details(room_id : String?) : Nil
