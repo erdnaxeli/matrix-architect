@@ -55,17 +55,8 @@ module Matrix::Architect
     end
 
     def self.run(line : String, room_id : String, conn : Connection) : Nil
-      args = line.split(" ").reject { |v| v == "" }
-      if command = args[0]?
-        if command[0] != '!'
-          return
-        elsif command == "!help"
-          # When a subcommand is passed, others a removed from the parser, so
-          # an "!help" subcommand could not see others.
-          # We trick the parser by changer "!help" to "-h".
-          args = ["-h"]
-        end
-      else
+      args = parse(line)
+      if !args.size || args[0][0] != '!'
         return
       end
 
@@ -107,6 +98,43 @@ module Matrix::Architect
         conn.send_message(room_id, msg)
       else
         job.call
+      end
+    end
+
+    def self.parse(line)
+      delimiter = nil
+      args = [] of String
+      acc = String::Builder.new
+
+      line.each_char do |c|
+        if delimiter.nil?
+          if c == ' '
+            if acc.empty?
+              next
+            else
+              args << acc.to_s
+              acc = String::Builder.new
+            end
+          elsif c == '"' || c == '\''
+            delimiter = c
+          else
+            acc << c
+          end
+        else
+          if c == delimiter
+            delimiter = nil
+          else
+            acc << c
+          end
+        end
+      end
+
+      if !delimiter.nil?
+        # there is a odd number of delimiter
+        return ["-h"]
+      else
+        args << acc.to_s
+        return args
       end
     end
   end
