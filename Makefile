@@ -1,5 +1,5 @@
 all:
-	crystal build src/main.cr
+	crystal build src/main.cr -o matrix-architect
 
 run:
 	crystal run src/main.cr
