@@ -1,8 +1,8 @@
 all:
-	crystal build src/matrix-architect.cr
+	crystal build src/main.cr -o matrix-architect
 
 run:
-	crystal run src/matrix-architect.cr
+	crystal run src/main.cr
 
 static:
-	crystal build --static src/matrix-architect.cr
+	crystal build --static src/main.cr

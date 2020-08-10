@@ -5,19 +5,30 @@ require "./events"
 require "./errors"
 
 module Matrix::Architect
-  class Connection
-    Log = Matrix::Architect::Log.for(self)
-
+  # Interafce to represent a Matrix client.
+  module Connection
     class ExecError < Exception
     end
 
+    abstract def edit_message(room_id : String, event_id : String, message : String, html : String? = nil) : Nil
+    abstract def send_message(room_id : String, message : String, html : String? = nil) : String
+    abstract def get(route, **options) : JSON::Any
+    abstract def post(route, data = nil, **options) : JSON::Any
+    abstract def put(route, data = nil) : JSON::Any
+  end
+
+  class ConnectionImpl
+    include Connection
+
+    Log = Matrix::Architect::Log.for(self)
+
+    @syncing = false
+    @tx_id = 0
     getter user_id : String = ""
 
     def initialize(hs_url : String, access_token : String)
       @access_token = access_token
       @hs_url = hs_url
-      @syncing = false
-      @tx_id = 0
 
       Log.info { "Connecting to #{hs_url}" }
       @client_sync = HTTP::Client.new(@hs_url, 443, true)
@@ -105,15 +116,15 @@ module Matrix::Architect
       response["user_id"].as_s
     end
 
-    def get(route, **options)
+    def get(route, **options) : JSON::Any
       exec "GET", route, **options
     end
 
-    def post(route, data = nil, **options)
+    def post(route, data = nil, **options) : JSON::Any
       exec "POST", route, **options, body: data
     end
 
-    def put(route, data = nil)
+    def put(route, data = nil) : JSON::Any
       exec "PUT", route, body: data
     end
 
