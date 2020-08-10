@@ -131,10 +131,10 @@ module Matrix::Architect
 
       if !delimiter.nil?
         # there is a odd number of delimiter
-        return ["-h"]
+        ["-h"]
       else
         args << acc.to_s
-        return args
+        args
       end
     end
   end
