@@ -25,7 +25,6 @@ module Matrix::Architect
         end
         parser.on("delete", "make all users leave a room and purge it") do
           block = false
-          shutdown = false
           message = nil
 
           parser.banner = "!room delete [--block] [--purge] [--msg MSG] ROOM_ID"
