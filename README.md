@@ -17,6 +17,7 @@ Current state of API implementation:
 * [ ] room_membership
 * [x] rooms
   * `!room count`
+  * `!room delete <room id>`
   * `!room details <room id>`
   * `!room list`
   * `!room top-complexity`
@@ -36,7 +37,7 @@ See `!help` for more details about the bot's commands.
 
 ## Installation
 
-You can download a static build from the [releases](https://github.com/erdnaxeli/matrix-architect/releases) page.
+~You can download a static build from the [releases](https://github.com/erdnaxeli/matrix-architect/releases) page.~ well actually this is not live yet
 
 If you want to build it yourself you need to [install Crystal](https://crystal-lang.org/install/) 0.34, then clone the code, go to the new folder and:
 
@@ -59,10 +60,9 @@ Setting the configuration:
 
 1. Create a new account for the bot on your HS, with your favorite client
 2. Log out (to discard any e2e key that would have been created)
-3. Use the script `tools/get_access_token.sh` to get a new access_token for the bot
 4. Set the new created account as
 [admin](https://github.com/matrix-org/synapse/tree/master/docs/admin_api).
-5. Copy the `config-example.yml` file to `config.yml` and fill the values
+3. Run `./matrix-architect gen-config`
 
 Run the bot with `./matrix-architect`. If you let the log level to "info" you should
 see some messages.
@@ -94,8 +94,6 @@ like the garbage-collect one.
 * Provide administration for bridges? That could be something useful.
 * Give some love to the cli executable:
   * implement account creation in the main executable
-  * implement config generation
-  * read the config file from well known places or cli parameter
 * Test the code
 
 ## Contributors
