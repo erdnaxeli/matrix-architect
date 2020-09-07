@@ -26,9 +26,8 @@ module Matrix::Architect
     @tx_id = 0
     getter user_id : String = ""
 
-    def initialize(hs_url : String, access_token : String)
-      @access_token = access_token
-      @hs_url = hs_url
+    def initialize(@hs_url : String, @access_token : String)
+      @hs_url = @hs_url.gsub(%r{https?://}, "")
 
       Log.info { "Connecting to #{hs_url}" }
       @client_sync = HTTP::Client.new(@hs_url, 443, true)
