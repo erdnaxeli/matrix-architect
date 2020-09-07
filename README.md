@@ -17,6 +17,7 @@ Current state of API implementation:
 * [ ] room_membership
 * [x] rooms
   * `!room count`
+  * `!room delete <room id>`
   * `!room details <room id>`
   * `!room list`
   * `!room top-complexity`
