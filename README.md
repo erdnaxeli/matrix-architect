@@ -95,6 +95,19 @@ docker run --init -v $PWD/config.yml:/app/config.yaml erdnaxeli/matrix-architect
 The bot does not register any signal handlers, so the `--init` parameter is mandatory
 if you want it to respond correctly to `^C` or `docker stop`.
 
+## Security consideration
+
+This bot use the Synapse's admin API (everything under `/_synapse/admin`).
+Although only admin users can use this API, make it available to the whole Internet
+is not recommanded. You probably want to run the bot on the same host as your
+Synapse instance and communicate through localhost (or you can use a private network).
+
+Note that the domain used to talk to Synapse is your (public) homeserver domain,
+so it means that (for example) if you want to access to the admin API on localhost
+only you need to have your homeserver domain resolves to `localhost` (by adding an
+entry to `/etc/hosts`). The public API (everything under `/_matrix`) must also be
+accessible on the same domain and IP.
+
 ## Contributing
 
 1. Fork it (<https://github.com/erdnaxeli/matrix-architect/fork>)
@@ -118,8 +131,6 @@ I am not sure we need all the admin API available though the bot, but it's sure
 there is probably space to implement new commands that combine different APIs,
 like the garbage-collect one.
 * Provide administration for bridges? That could be something useful.
-* Give some love to the cli executable:
-  * implement account creation in the main executable
 * Test the code
 
 ## Contributors
