@@ -37,9 +37,20 @@ See `!help` for more details about the bot's commands.
 
 ## Installation
 
+### Static build
+
 ~You can download a static build from the [releases](https://github.com/erdnaxeli/matrix-architect/releases) page.~ well actually this is not live yet
 
-If you want to build it yourself you need to [install Crystal](https://crystal-lang.org/install/) 0.34, then clone the code, go to the new folder and:
+### Docker
+
+You can use the provided `Dockerfile` to build a docker image, or use the already built one (see the usage section for more details):
+```
+docker run --init -v $PWD/config.yml:/app/config.yaml erdnaxeli/matrix-architect
+```
+
+### From source
+
+If you want to build it yourself you need to [install Crystal](https://crystal-lang.org/install/) 0.35, then clone the code, go to the new folder and:
 
 ```
 make
@@ -56,7 +67,7 @@ If you have trouble you want prefer to build yourself a not static binary.
 
 ## Usage
 
-Setting the configuration:
+Set the configuration:
 
 1. Create a new account for the bot on your HS, with your favorite client
 2. Log out (to discard any e2e key that would have been created)
@@ -68,6 +79,21 @@ Run the bot with `./matrix-architect`. If you let the log level to "info" you sh
 see some messages.
 
 You can now talk to the bot on Matrix!
+
+### With docker
+
+The commands are a little bit different:
+```
+# create an empty config file so we can mount it in the docker container
+touch config.yml
+# generate the config
+docker run -it --rm --init -v $PWD/config.yml:/app/config.yaml erdnaxeli/matrix-architect gen-config
+# run the bot
+docker run --init -v $PWD/config.yml:/app/config.yaml erdnaxeli/matrix-architect
+```
+
+The bot does not register any signal handlers, so the `--init` parameter is mandatory
+if you want it to respond correctly to `^C` or `docker stop`.
 
 ## Contributing
 
