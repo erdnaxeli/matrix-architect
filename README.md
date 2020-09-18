@@ -45,7 +45,7 @@ See `!help` for more details about the bot's commands.
 
 You can use the provided `Dockerfile` to build a docker image, or use the already built one (see the usage section for more details):
 ```
-docker run --init -v $PWD/config.yml:/app/config.yaml erdnaxeli/matrix-architect
+docker run --init -v $PWD/config.yml:/app/config.yml erdnaxeli/matrix-architect
 ```
 
 ### From source
@@ -87,9 +87,9 @@ The commands are a little bit different:
 # create an empty config file so we can mount it in the docker container
 touch config.yml
 # generate the config
-docker run -it --rm --init -v $PWD/config.yml:/app/config.yaml erdnaxeli/matrix-architect gen-config
+docker run -it --rm --init -v $PWD/config.yml:/app/config.yml erdnaxeli/matrix-architect gen-config
 # run the bot
-docker run --init -v $PWD/config.yml:/app/config.yaml erdnaxeli/matrix-architect
+docker run --init -v $PWD/config.yml:/app/config.yml erdnaxeli/matrix-architect
 ```
 
 The bot does not register any signal handlers, so the `--init` parameter is mandatory
