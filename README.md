@@ -35,6 +35,8 @@ Current state of API implementation:
 
 See `!help` for more details about the bot's commands.
 
+You can join the discussion at [#matrix-architect:cervoi.se](https://cervoi.se/element/#/room/#matrix-architect:cervoi.se).
+
 ## Installation
 
 ### Static build
