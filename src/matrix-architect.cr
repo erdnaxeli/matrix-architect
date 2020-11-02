@@ -94,7 +94,7 @@ module Matrix::Architect
       puts "Got an response from the homserver with status code #{response.status_code}: #{response.body}"
     end
 
-    data = Hash(String, String).from_json(response.body)
+    data = Hash(String, JSON::Any).from_json(response.body)
     if !data.has_key?("access_token")
       puts "Unkwon response from homeserver: #{data}"
       return
